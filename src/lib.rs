@@ -17,7 +17,7 @@ use nom::{
 #[derive(Debug, PartialEq, Clone)]
 enum JsonNode<'a> {
     Object(Box<IndexMap<&'a str, JsonNode<'a>>>),
-    Array(Box<Vec<JsonNode<'a>>>),
+    Array(Vec<JsonNode<'a>>),
     String(&'a str),
     Number(f64),
     Boolean(bool),
@@ -66,13 +66,13 @@ fn parse_array(json: &str) -> IResult<&str, JsonNode> {
             separated_list0(delimited(multispace0, tag(","), multispace0), parse_json),
             tag("]"),
         ),
-        |v| JsonNode::Array(Box::new(v)),
+        JsonNode::Array,
     )(json)
 }
 
 fn parse_number(json: &str) -> IResult<&str, JsonNode> {
     // We can reuse the parser already built into nom!
-    map(double, |n| JsonNode::Number(n))(json)
+    map(double, JsonNode::Number)(json)
 }
 
 /// Parses a string and returns it "raw", without building a JsonNode
@@ -84,7 +84,7 @@ fn parse_string_inner(json: &str) -> IResult<&str, &str> {
 
 /// Parses a string and wraps it into a JsonNode
 fn parse_string(json: &str) -> IResult<&str, JsonNode> {
-    map(parse_string_inner, |s: &str| JsonNode::String(s))(json)
+    map(parse_string_inner, JsonNode::String)(json)
 }
 
 fn parse_boolean(json: &str) -> IResult<&str, JsonNode> {
@@ -167,22 +167,19 @@ mod tests {
 
     #[test]
     fn can_parse_array() {
+        assert_eq!(Ok(("", JsonNode::Array(Vec::new()))), parse_array("[]"));
         assert_eq!(
-            Ok(("", JsonNode::Array(Box::new(Vec::new())))),
-            parse_array("[]")
-        );
-        assert_eq!(
-            Ok(("", JsonNode::Array(Box::new(vec![JsonNode::Boolean(true)])))),
+            Ok(("", JsonNode::Array(vec![JsonNode::Boolean(true)]))),
             parse_array("[true]")
         );
         assert_eq!(
             Ok((
                 "",
-                JsonNode::Array(Box::new(vec![
+                JsonNode::Array(vec![
                     JsonNode::Boolean(false),
                     JsonNode::Null,
                     JsonNode::Boolean(false)
-                ]))
+                ])
             )),
             parse_array("[false, null, false]")
         );
