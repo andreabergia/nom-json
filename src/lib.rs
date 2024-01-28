@@ -78,7 +78,7 @@ fn parse_number(json: &str) -> IResult<&str, JsonNode> {
 /// Parses a string and returns it "raw", without building a JsonNode
 fn parse_string_inner(json: &str) -> IResult<&str, &str> {
     // A string is delimited by quote marks. Here we do not handle unicode or escape characters,
-    // but take a lookt at https://github.com/rust-bakery/nom/blob/main/examples/string.rs
+    // but take a look at https://github.com/rust-bakery/nom/blob/main/examples/string.rs
     delimited(tag("\""), take_until("\""), tag("\""))(json)
 }
 
