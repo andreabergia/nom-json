@@ -6,14 +6,11 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  ENV CARGO_INCREMENTAL: 0
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    env:
-      CARGO_TERM_COLOR: always
-      ENV CARGO_INCREMENTAL: 0
 
     steps:
       - uses: actions/checkout@v3
